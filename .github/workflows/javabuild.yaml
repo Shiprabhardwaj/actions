@@ -35,6 +35,24 @@ jobs:
      distribution: temurin
      cache: maven
 
+  - name: setup node js
+    if: inputs.app == 'node.js'
+    uses: actions/setup-node@v4
+    with:
+     node-version: 18
+
+  - name: Install depdendencies
+    if: inputs.app == 'node.js'
+    run: npm install
+
+  - name: run tests
+    if: inputs.app == 'node.js'
+    run: npm test
+
+  - name: Run Build process
+    if: inputs.app == 'node.js'
+    run: npm run build
+
   - name: Build with Maven
     if: inputs.app == 'Java'
     run: mvn clean install -DskipTests
