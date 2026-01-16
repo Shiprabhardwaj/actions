@@ -1,71 +1,69 @@
 name: Java Build Workflow with Docker
 
 on:
- # pull_request:
- # branches:
- #  - main
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Choose node.js, python or Java'
+        required: true
+        type: choice
+        default: Java
+        options:
+          - Java
+          - python
+          - node.js
 
- workflow_dispatch:
-  inputs:
-   app:
-    description: 'Choose python,node.js or java'
-    default: Java
-    required: true
-    type: choice
-    options:
-    - Java
-    - python
-    - node.js
-    
- push:
-  branches:
-  - main
+  push:
+    branches:
+      - main
 
 jobs:
- Build:
-  runs-on: ubuntu-latest
-  steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  - name: setup Java
-    uses: actions/setup-java@v4
-    with:
-     java-version: '17'
-     distribution: temurin
-     cache: maven
+      - name: setup Java
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: maven
 
-  - name: setup node js
-    if: inputs.app == 'node.js'
-    uses: actions/setup-node@v4
-    with:
-     node-version: 18
+      - name: setup node js
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-  - name: Install depdendencies
-    if: inputs.app == 'node.js'
-    run: npm install
+      - name: Install dependencies (node)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        run: npm install
 
-  - name: run tests
-    if: inputs.app == 'node.js'
-    run: npm test
+      - name: run tests (node)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        run: npm test
 
-  - name: Run Build process
-    if: inputs.app == 'node.js'
-    run: npm run build
+      - name: Run Build process (node)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        run: npm run build
 
-  - name: Build with Maven
-    if: inputs.app == 'Java'
-    run: mvn clean install -DskipTests
+      - name: Build with Maven
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
+        run: mvn clean install -DskipTests
 
-  - name: build docker image
-    run: docker build -t demo-app:${{github.sha}} .
+      - name: build docker image
+        # Run docker build for both Java and node.js when triggered via workflow_dispatch,
+        # or always on push. Adjust as you want.
+        if: ${{ (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'Java' || github.event.inputs.app == 'node.js')) || github.event_name == 'push' }}
+        run: docker build -t demo-app:${{ github.sha }} .
 
-  - name: upload an artifact
-    uses: actions/upload-artifact@v4
-    with:
-      name: javaapp
-      path: staging
-      retention: 1
-     
-  
- 
+      - name: upload an artifact
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: myapp
+          path: staging
+          retention: 1
