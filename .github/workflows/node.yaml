@@ -1,0 +1,35 @@
+name: node js app
+on:
+ push:
+ pull_request:
+ workflow_dispatch:
+
+jobs:
+ python_app:
+  runs-on:
+   ubuntu-latest
+  steps:
+  - name: checkout code
+    uses: actions/checkout@v4
+
+  - name: setup node js
+    uses: actions/setup-node@v4
+    with:
+     node-version: 18
+
+  - name: Install depdendencies
+    run: npm install
+
+  - name: run tests
+    run: npm test
+
+  - name: Run Build process
+    run: npm run build
+
+  - name: setup java
+    actions/setup-java
+    with:
+      version: 
+
+  - name: build job
+    
