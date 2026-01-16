@@ -1,18 +1,28 @@
 name: Java Build Workflow with Docker
 
 on:
- pull_request:
-  branches:
-  - main
+ # pull_request:
+ # branches:
+ #  - main
 
  workflow_dispatch:
-
+  inputs:
+   app:
+    description: 'Choose python,node.js or java'
+    default: Java
+    required: true
+    type: choice
+    options:
+    - Java
+    - python
+    - node.js
+    
  push:
   branches:
   - main
 
 jobs:
- Java_App:
+ Build:
   runs-on: ubuntu-latest
   steps:
   - name: Checkout code
@@ -26,10 +36,18 @@ jobs:
      cache: maven
 
   - name: Build with Maven
+    if: inputs.app == 'Java'
     run: mvn clean install -DskipTests
 
   - name: build docker image
     run: docker build -t demo-app:${{github.sha}} .
+
+  - name: upload an artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: javaapp
+      path: staging
+      retention: 1
      
   
  
