@@ -1,0 +1,35 @@
+name: Java Build Workflow with Docker
+
+on:
+ pull_request:
+  branches:
+  - main
+
+ workflow_dispatch:
+
+ push:
+  branches:
+  - main
+
+jobs:
+ Java_App:
+  runs-on: ubuntu_latest
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+
+  - name: setup Java
+    uses: actions/setup-java@v4
+    with:
+     java-version: '17'
+     distribution: temurin
+     cache: maven
+
+  - name: Build with Maven
+    run: mvn clean install -DskipTests
+
+  - name: build docker image
+    run: docker build -t demo-app${{github.sha}}
+     
+  
+ 
