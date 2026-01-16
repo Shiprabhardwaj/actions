@@ -26,10 +26,4 @@ jobs:
   - name: Run Build process
     run: npm run build
 
-  - name: setup java
-    actions/setup-java
-    with:
-      version: 
-
-  - name: build job
     
