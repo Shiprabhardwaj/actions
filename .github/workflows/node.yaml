@@ -5,7 +5,7 @@ on:
  workflow_dispatch:
 
 jobs:
- python_app:
+ node_app:
   runs-on:
    ubuntu-latest
   steps:
