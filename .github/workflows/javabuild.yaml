@@ -48,7 +48,9 @@ jobs:
 
       - name: Run Build process (node)
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
-        run: npm run build
+        run: | 
+         - npm run build
+         - ls -lrt
 
       - name: Build with Maven
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
