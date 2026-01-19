@@ -13,9 +13,9 @@ on:
           - python
           - node.js
 
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   Build:
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: setup Java
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' && github.ref_name == 'main' }}
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -33,36 +33,33 @@ jobs:
           cache: maven
 
       - name: setup node js
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' && github.ref_name == 'main'}}
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install dependencies (node)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
-        run: npm install
-
-      - name: run tests (node)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
-        run: npm test
-
-      - name: Run Build process (node)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+      - name: Install dependencies,Test,Build (node)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' && github.ref_name == 'main' }}
         run: | 
-         - npm run build
-         - ls -lrt
+         ## Install dependencies
+         npm install
+         ## Run tests
+         npm test
+         ## run build
+         npm run build
+         ls- lrt
 
       - name: Build with Maven
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' && github.ref_name == 'main' }}
         run: mvn clean install -DskipTests
 
       - name: Build Docker image (node)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'node.js' && github.ref_name == 'main' }}
         run: |
          docker build --target runtime-node -t demo-app-node:${{ github.sha }} .
 
       - name: Build Docker image (java)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app == 'Java' && github.ref_name == 'main' }}
         run: |
          docker build --target runtime-java -t demo-app-java:${{ github.sha }} .
 
@@ -73,3 +70,12 @@ jobs:
           name: myapp
           path: staging
           retention: 1
+
+      - name: download an artifact
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/download-artifact@v4
+        with:
+         name: myapp
+         path: staging
+         retention: 1
+
