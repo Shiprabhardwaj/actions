@@ -48,7 +48,7 @@ jobs:
          npm test
          ## run build
          npm run build
-         ls- lrt
+         ls -lrt
 
       - name: Build with Maven
         if: ${{ github.event.inputs.app == 'Java' }}
