@@ -76,5 +76,4 @@ jobs:
         with:
          name: myapp
          path: staging
-         retention: 1
 
