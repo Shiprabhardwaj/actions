@@ -1,0 +1,21 @@
+name: action to login on openshift cluster
+description: action to login
+inputs:
+  image:
+    description: image name
+    required: true
+  target:
+    description: target name
+    required: true
+  
+outputs:
+ image:
+  descriptipn: 
+  value: ${{ steps.build.outputs.image }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Build docker image
+      id: build
+      runs: |
+        image = docker build --target ${{inputs.target}} -t ${{ inputs.image }} .
