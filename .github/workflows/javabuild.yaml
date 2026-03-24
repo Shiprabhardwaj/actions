@@ -107,8 +107,10 @@ jobs:
       
    - name: Deploy image in openshift cluser
      run: | 
-      oc apply -f deployment.yaml --image = 
-      
+      oc process -f generic.json \
+      -p IMAGE_TAG="demo-app-java:${{ github.sha }}" \
+      -p SERVICE_NAME="kdskd" \
+      -p VAULT_USER="user" | oc apply -f -
      
     
   
