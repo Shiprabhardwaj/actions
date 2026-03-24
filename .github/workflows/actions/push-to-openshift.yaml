@@ -2,17 +2,13 @@ name: push image to opemshift
 description:
 inputs:
  image:
-  description:
+  description: image built
   required: true
-
+  
 
 runs:
  using: 'composite'
  steps:
- - name: tag image
-   env: 
-    name: dev
-    image: ${{ inputs.image }}
-    
-   runs: |
-    docker push ${{ env.image }}
+   - name: push to openshift image repository
+     runs: |
+      docker push ${{ env.image }}
