@@ -21,6 +21,8 @@ jobs:
   Build:
     if: ${{ github.ref_name == 'main' }}
     runs-on: ubuntu-latest
+    outputs:
+     image_tag: ${{ steps.build.outputs.image }} 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,15 +53,18 @@ jobs:
          ls -lrt
 
       - name: Build with Maven
+        id: build
         if: ${{ github.event.inputs.app == 'Java' }}
         run: mvn clean install -DskipTests
 
       - name: Build Docker image (node)
+        id: build
         if: ${{ github.event.inputs.app == 'node.js' }}
         run: |
          docker build --target runtime-node -t demo-app-node:${{ github.sha }} .
 
       - name: Build Docker image (java)
+        id: build
         if: ${{ github.event.inputs.app == 'Java' }}
         uses:
         with:
@@ -81,7 +86,7 @@ jobs:
 
   Deploy:
    runs-on: ubuntu-latest
-   depends-on: {{ job.build }}
+   needs: Build
    steps:
    # - name: move image to jfrog artifactory or any other docker hub
    #  with:
@@ -98,11 +103,11 @@ jobs:
    - name: Push image into some namespace
      uses: actions/push-to-openshift
      with:
-      image: 
+      image: ${{ needs.Build.outputs.image_tag }}"
       
    - name: Deploy image in openshift cluser
      run: | 
-      oc apply -f deployment.yaml --image =
+      oc apply -f deployment.yaml --image = 
       
      
     
