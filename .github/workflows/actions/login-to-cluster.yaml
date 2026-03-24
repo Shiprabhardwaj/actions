@@ -1,0 +1,25 @@
+name: action to login on openshift cluster
+description: action to login
+inputs:
+  username:
+  description: username for login
+  required: true
+  password:
+   description: password for service account for login
+   required: true
+  namespace:
+   description: specify namespace to switch to project
+   required: true
+  
+runs:
+ using: 'composite'
+ steps:
+ - name: Login to openshift cluster
+   run: |
+    oc login -u {{ inputs.username}} -p ${{ secrets.password }}
+    
+ - name: switch namespace
+   run: oc project dev
+    
+    
+  
