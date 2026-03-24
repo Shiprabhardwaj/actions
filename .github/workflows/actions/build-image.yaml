@@ -9,13 +9,14 @@ inputs:
     required: true
   
 outputs:
- image:
-  descriptipn: 
-  value: ${{ steps.build.outputs.image }}
+  image:
+    description: built image
+    value: ${{ steps.build.outputs.image }}
 runs:
   using: 'composite'
   steps:
     - name: Build docker image
       id: build
-      runs: |
-        image = docker build --target ${{inputs.target}} -t ${{ inputs.image }} .
+      shell: bash
+      run: |
+        docker build --target ${{ inputs.target }} -t ${{ inputs.image }} .
