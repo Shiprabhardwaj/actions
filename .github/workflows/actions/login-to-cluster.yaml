@@ -2,24 +2,53 @@ name: action to login on openshift cluster
 description: action to login
 inputs:
   username:
-  description: username for login
-  required: true
+    description: username for login
+    required: true
   password:
-   description: password for service account for login
-   required: true
+    description: password for service account for login
+    required: true
   namespace:
-   description: specify namespace to switch to project
-   required: true
-  
+    description: specify namespace to switch to project
+    required: true
+
 runs:
- using: 'composite'
- steps:
- - name: Login to openshift cluster
-   run: |
-    oc login -u {{ inputs.username}} -p ${{ secrets.password }}
-    
- - name: switch namespace
-   run: oc project dev
-    
-    
-  
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.username }}" ]]; then
+          echo "::error::Username is required but not provided"
+          exit 1
+        fi
+        if [[ -z "${{ inputs.password }}" ]]; then
+          echo "::error::Password is required but not provided"
+          exit 1
+        fi
+        if [[ -z "${{ inputs.namespace }}" ]]; then
+          echo "::error::Namespace is required but not provided"
+          exit 1
+        fi
+        echo "::notice::All required inputs validated successfully"
+
+    - name: Login to openshift cluster
+      shell: bash
+      run: |
+        set -e
+        if ! oc login -u "${{ inputs.username }}" -p "${{ inputs.password }}" 2>&1; then
+          echo "::error::Failed to login to OpenShift cluster. Please check username and password."
+          exit 1
+        fi
+        echo "::notice::Successfully logged in to OpenShift cluster"
+
+    - name: Validate namespace
+      shell: bash
+      run: |
+        set -e
+        if ! oc project "${{ inputs.namespace }}" 2>&1; then
+          echo "::error::Failed to switch to namespace '${{ inputs.namespace }}'. Namespace may not exist or you don't have permission."
+          echo "::notice::Available namespaces:"
+          oc projects || true
+          exit 1
+        fi
+        echo "::notice::Successfully switched to namespace '${{ inputs.namespace }}'"
