@@ -20,3 +20,4 @@ runs:
       shell: bash
       run: |
         docker build --target ${{ inputs.target }} -t ${{ inputs.image }} .
+        echo "image=${{ inputs.image }}" >> $GITHUB_OUTPUT
